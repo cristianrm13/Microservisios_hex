@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { ObjectId } from 'mongodb';
 import Usuario, { IUsuario } from '../../domain/models/usuario';
+import { logAudit } from '../../services/auditService';
+
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
@@ -34,9 +36,12 @@ export class UserController {
             await usuario.save();
             console.log(`Usuario ${nombre} guardado en la base de datos.`);
 
+            // Registrar auditoría
+            await logAudit(usuario._id.toString(), 'create', `Usuario creado: ${nombre}`);
+
             const token = jwt.sign(
                 { _id: usuario._id },
-                process.env.JWT_SECRET || 'your_secret_key'
+                process.env.JWT_SECRET || 'holatutu'
             );
             console.log(`Token JWT generado: ${token}`);
 
@@ -85,7 +90,10 @@ export class UserController {
             if (!usuario || usuario.contrasena !== contrasena) {
                 return res.status(401).send({ error: 'Credenciales no válidas.' });
             }
-            const token = jwt.sign({ _id: usuario._id }, process.env.JWT_SECRET || 'your_secret_key');
+            const token = jwt.sign({ _id: usuario._id }, process.env.JWT_SECRET || 'holatutu');
+            // Registrar auditoría
+            await logAudit(usuario._id.toString(), 'login', `Usuario inició sesión: ${correo}`);
+
             res.send({ usuario, token });
         } catch (error) {
             res.status(400).send(error);
@@ -136,6 +144,10 @@ export class UserController {
                 (usuario as any)[update] = req.body[update];
             });
             await usuario.save();
+
+            // Registrar auditoría
+            await logAudit(usuario._id.toString(), 'update', `Usuario actualizado: ${usuario.correo}`);
+
             res.status(200).send(usuario);
         } catch (error) {
             res.status(400).send(error);
@@ -149,6 +161,9 @@ export class UserController {
             if (!usuario) {
                 return res.status(404).send();
             }
+            // Registrar auditoría
+            await logAudit(usuario._id.toString(), 'delete', `Usuario eliminado: ${usuario.correo}`);
+
             res.status(200).send(usuario);
         } catch (error) {
             res.status(500).send(error);

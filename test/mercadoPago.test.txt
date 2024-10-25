@@ -1,0 +1,85 @@
+import request from 'supertest';
+import { app } from '../src/infrastructure/index'; 
+
+// Mockear el servicio de Mercado Pago
+jest.mock('../src/services/mercadoPagoService', () => {
+    return {
+        MercadoPagoService: jest.fn().mockImplementation(() => {
+            return {
+                createPayment: jest.fn(() => Promise.resolve({
+                    id: 'mockPreferenceId',
+                    init_point: 'https://mock-init-point.com',
+                })),
+                processNotification: jest.fn(() => Promise.resolve({
+                    status: 'ok'
+                })),
+            };
+        }),
+    };
+});
+
+describe('POST /api/v1/mercadopago/pago', () => {
+    it('Debe crear una preferencia de pago correctamente', async () => {
+        const preferenceData = {
+            items: [
+                {
+                    title: 'Producto Prueba',
+                    quantity: 2,
+                    unit_price: 40,
+                    currency_id: 'MXN'  // Añadir la propiedad de moneda
+                }
+            ],
+            payer: {
+                email: '221267@ids.upchiapas.edu.mx',
+                phone: {
+                    number: '+5219612835436'
+                }
+            }
+        };
+
+        const response = await request(app)
+            .post('/api/v1/mercadopago/pago')
+            .send(preferenceData)
+            .expect(200);  // Esperamos que la respuesta sea 200
+
+        // Verificamos que la respuesta tenga los campos init_point y preference_id
+        expect(response.body).toHaveProperty('init_point', 'https://mock-init-point.com');
+        expect(response.body).toHaveProperty('preference_id', 'mockPreferenceId');
+        expect(response.status).toBe(200);
+    });
+
+    it('Debe devolver un error si los datos de preferencia son incorrectos', async () => {
+        const invalidPreferenceData = {}; // Datos inválidos
+
+        const response = await request(app)
+            .post('/api/v1/mercadopago/pago')
+            .send(invalidPreferenceData)
+            .expect(400);  // Esperamos que la respuesta sea 400
+
+        expect(response.body).toHaveProperty('error');
+    });
+});
+
+describe('POST /api/v1/webhook', () => {
+    it('Debe procesar correctamente la notificación de Mercado Pago', async () => {
+        const notificationData = {
+            id: '12345',
+            topic: 'payment',
+            data: {
+                id: '67890'
+            }
+        };
+
+        const response = await request(app)
+            .post('/api/v1/webhook')
+            .send(notificationData)
+            .expect(200); 
+
+        expect(response.body).toEqual({ status: 'ok' });
+        
+        // Verificar que el método processNotification fue llamado con los datos correctos
+        const { MercadoPagoService } = require('../src/services/mercadoPagoService');
+        const mercadoPagoServiceInstance = new MercadoPagoService();
+        expect(mercadoPagoServiceInstance.processNotification).toHaveBeenCalledWith(notificationData);
+    });
+});

@@ -11,7 +11,7 @@ const mercadoPagoService = new MercadoPagoService();  // Instancia del servicio
 router.post('/pago', async (req: Request, res: Response) => {
     try {
         const baseUrl = process.env.NGROK_T || '';
-        const notificationUrl = `${baseUrl}/api/v1/mercado-pago/webhook`;
+        const notificationUrl = `${baseUrl}/api/v1/mercadopago/webhook`;
         console.log('Recibido preferenceData:', req.body);
 
         const preferenceData = {
@@ -44,8 +44,6 @@ router.post('/pago', async (req: Request, res: Response) => {
         res.status(500).json({ detail: error.message });
     }
 });
-
-
 
 
 // Ruta para el webhook de Mercado Pago
