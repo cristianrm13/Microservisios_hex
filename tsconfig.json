@@ -10,6 +10,10 @@
     "exclude": [
       "node_modules",
       "dist"
+    ],
+    "include": [
+       // "src/**/*",
+        "multer.d.ts" // Asegúrate de incluir el archivo de tipos
     ]
   }
   
