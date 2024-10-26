@@ -56,12 +56,12 @@ export class UserController {
             const mailOptions = {
                 from: '221267@ids.upchiapas.edu.mx',
                 to: correo,
-                subject: '¡Bienvenido a nuestra plataforma!',
+                subject: '¡Bienvenido a GladBox!',
                 text: `¡Hola ${nombre}!, tu código de verificación es: ${codigoVerificacion}`,
                 html: `
                     <div style="text-align: center; font-family: Arial, sans-serif;">
                         <h1>¡Hola ${nombre}!</h1>
-                        <p>Gracias por unirte a nuestra plataforma. Tu código de verificación es:</p>
+                        <p>Gracias por unirte a nuestra comunidad!. Tu código de verificación es:</p>
                         <div style="display: inline-block; padding: 10px; border: 2px solid #000; border-radius: 5px;">
                             <h2>${codigoVerificacion}</h2>
                         </div>
@@ -91,7 +91,7 @@ export class UserController {
                 return res.status(401).send({ error: 'Credenciales no válidas.' });
             }
             const token = jwt.sign({ _id: usuario._id }, process.env.JWT_SECRET || 'holatutu');
-            // Registrar auditoría
+            // Registrar auditoría al logearse
             await logAudit(usuario._id.toString(), 'login', `Usuario inició sesión: ${correo}`);
 
             res.send({ usuario, token });
@@ -145,7 +145,7 @@ export class UserController {
             });
             await usuario.save();
 
-            // Registrar auditoría
+            // Registrar auditoría al actualizar un usuario
             await logAudit(usuario._id.toString(), 'update', `Usuario actualizado: ${usuario.correo}`);
 
             res.status(200).send(usuario);
@@ -161,7 +161,7 @@ export class UserController {
             if (!usuario) {
                 return res.status(404).send();
             }
-            // Registrar auditoría
+            // Registrar auditoría al eliminar usuario
             await logAudit(usuario._id.toString(), 'delete', `Usuario eliminado: ${usuario.correo}`);
 
             res.status(200).send(usuario);

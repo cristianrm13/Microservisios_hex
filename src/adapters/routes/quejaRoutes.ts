@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { QuejaController } from '../controllers/quejasController';
 import { authMiddleware } from '../middlewares/authMiddleware';
+import { upload } from '../middlewares/multerConfig';
 import rateLimit from 'express-rate-limit';
 
 const router = Router();
@@ -14,7 +15,6 @@ const quejaLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-
 // Rutas para quejas
 router.get('/', authMiddleware, quejaController.obtenerQuejas); // Obtener todas las quejas
 router.get('/:id', authMiddleware, quejaController.obtenerQuejaPorId); // Obtener queja por ID
@@ -22,6 +22,6 @@ router.patch('/:id', authMiddleware, quejaController.actualizarQueja); // Actual
 router.delete('/:id', authMiddleware, quejaController.eliminarQueja); // Eliminar queja por ID
 
 // Aplicar el limitador de velocidad en la ruta para crear quejas
-router.post('/', quejaLimiter, authMiddleware, quejaController.crearQueja); // Crear queja
+router.post('/', upload.single('file'), quejaLimiter, authMiddleware, quejaController.crearQueja); // Crear queja
 
 export default router;

@@ -42,10 +42,12 @@ const corsOptions = {
 // Aplicar CORS a toda la aplicación
 app.use(cors(corsOptions)); */
 
+
 app.use(cors());
 app.use(express.json());
 
 app.use('/api', routes);
+
 app.use('/api/audit', auditRoutes);
 
 app.listen(port, () => {

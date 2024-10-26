@@ -24,13 +24,14 @@ const dailyLimiter = rateLimit({
     legacyHeaders: false,
 });
 
+// Aplicar el limitador de velocidad en la ruta de login
+router.post('/',dailyLimiter, validarUsuario, userController.crearUsuario);
+router.post('/login', loginLimiter, userController.loginUsuario);
+
 router.get('/', authMiddleware, userController.obtenerUsuarios);
 router.get('/:id', authMiddleware, userController.obtenerUsuarioPorId);
 router.put('/:id', authMiddleware, validarUsuario, userController.actualizarUsuario);
 router.delete('/:id', authMiddleware, userController.eliminarUsuario);
 
-// Aplicar el limitador de velocidad en la ruta de login
-router.post('/',dailyLimiter, validarUsuario, userController.crearUsuario);
-router.post('/login', loginLimiter, userController.loginUsuario);
 
 export default router;

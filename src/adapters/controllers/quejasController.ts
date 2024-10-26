@@ -8,7 +8,9 @@ export class QuejaController {
     crearQueja = async (req: Request, res: Response) => {
         try {
             const { title, description, category } = req.body;
-            const queja = new Queja({ title, description, category });
+            const filePath = req.file?.path; // Obtener la ruta del archivo
+
+            const queja = new Queja({ title, description, category, filePath });
             await queja.save();
             res.status(201).send(queja);
         } catch (error) {
