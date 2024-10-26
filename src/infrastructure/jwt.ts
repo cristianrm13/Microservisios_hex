@@ -1,7 +1,5 @@
 import jwt from 'jsonwebtoken';
 
-// error si JWT_SECRET no está definido
-
 const secret = process.env.JWT_SECRET;
 if (!secret) {
     throw new Error('JWT_SECRET no ha sido definido');
