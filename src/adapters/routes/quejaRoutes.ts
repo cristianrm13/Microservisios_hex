@@ -16,8 +16,8 @@ const quejaLimiter = rateLimit({
 });
 
 // Rutas para quejas
-router.get('/', authMiddleware, quejaController.obtenerQuejas); // Obtener todas las quejas
-router.get('/:id', authMiddleware, quejaController.obtenerQuejaPorId); // Obtener queja por ID
+router.get('/', /* authMiddleware, */ quejaController.obtenerQuejas); // Obtener todas las quejas
+router.get('/:id', /* authMiddleware, */ quejaController.obtenerQuejaPorId); // Obtener queja por ID
 router.patch('/:id', authMiddleware, quejaController.actualizarQueja); // Actualizar queja por ID
 router.delete('/:id', authMiddleware, quejaController.eliminarQueja); // Eliminar queja por ID
 
