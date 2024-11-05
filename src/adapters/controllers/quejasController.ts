@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Queja, { IQueja } from '../../domain/models/quejas';
+import Queja from '../../domain/models/quejas';
 
 export class QuejaController {
     constructor() {}
@@ -10,8 +10,7 @@ export class QuejaController {
             const { title, description, category } = req.body;
             const filePath = req.file?.path; // Obtener la ruta del archivo
 
-            const queja = new Queja({ title, description, category, filePath });
-            await queja.save();
+            const queja = await Queja.create({ title, description, category, filePath });
             res.status(201).send(queja);
         } catch (error) {
             console.error('Error al crear la queja:', error);
@@ -22,7 +21,7 @@ export class QuejaController {
     // Obtener todas las quejas
     obtenerQuejas = async (req: Request, res: Response) => {
         try {
-            const quejas = await Queja.find({});
+            const quejas = await Queja.findAll();
             res.status(200).send(quejas);
         } catch (error) {
             res.status(500).send({ error: 'Error al obtener las quejas.' });
@@ -31,9 +30,8 @@ export class QuejaController {
 
     // Obtener una queja por ID
     obtenerQuejaPorId = async (req: Request, res: Response) => {
-        const _id = req.params.id;
         try {
-            const queja = await Queja.findById(_id);
+            const queja = await Queja.findByPk(req.params.id);
             if (!queja) {
                 return res.status(404).send({ error: 'Queja no encontrada.' });
             }
@@ -45,8 +43,8 @@ export class QuejaController {
 
     // Actualizar una queja por ID
     actualizarQueja = async (req: Request, res: Response) => {
-        const updates = Object.keys(req.body) as Array<keyof IQueja>;
-        const allowedUpdates: Array<keyof IQueja> = ['title', 'description', 'category', 'status'];
+        const updates = Object.keys(req.body);
+        const allowedUpdates = ['title', 'description', 'category', 'status'];
         const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
 
         if (!isValidOperation) {
@@ -54,31 +52,33 @@ export class QuejaController {
         }
 
         try {
-            const queja = await Queja.findById(req.params.id);
-            if (!queja) {
+            const [updatedRows, [updatedQueja]] = await Queja.update(req.body, {
+                where: { id: req.params.id },
+                returning: true,
+            });
+
+            if (updatedRows === 0) {
                 return res.status(404).send({ error: 'Queja no encontrada.' });
             }
-
-            updates.forEach((update) => {
-                (queja as any)[update] = req.body[update];
-            });
-            await queja.save();
-            res.status(200).send(queja);
+            res.status(200).send(updatedQueja);
         } catch (error) {
-            res.status(400).send(error);
+            res.status(400).send({ error: 'Error al actualizar la queja.' });
         }
     };
 
     // Eliminar una queja por ID
     eliminarQueja = async (req: Request, res: Response) => {
         try {
-            const queja = await Queja.findByIdAndDelete(req.params.id);
-            if (!queja) {
+            const deletedRows = await Queja.destroy({
+                where: { id: req.params.id },
+            });
+
+            if (!deletedRows) {
                 return res.status(404).send({ error: 'Queja no encontrada.' });
             }
-            res.status(200).send(queja);
+            res.status(200).send({ message: 'Queja eliminada correctamente.' });
         } catch (error) {
-            res.status(500).send(error);
+            res.status(500).send({ error: 'Error al eliminar la queja.' });
         }
     };
 }
