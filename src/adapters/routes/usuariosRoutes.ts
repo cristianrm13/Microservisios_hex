@@ -7,7 +7,6 @@ import rateLimit from 'express-rate-limit';
 const router = Router();
 const userController = new UserController();
 
-// Definir el limitador de solicitudes (por ejemplo, para la ruta de login)
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
     max: 5, // Limitar a 5 intentos de inicio de sesión por IP
@@ -18,7 +17,7 @@ const loginLimiter = rateLimit({
 
 const dailyLimiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000,//  1 dia
-    max: 3, // Limitar a 3 intentos de inicio de sesión por IP
+    max: 300, // Limitar a 3 intentos de inicio de sesión por IP
     message: 'Intenta de nuevo más tarde.',
     standardHeaders: true,
     legacyHeaders: false,

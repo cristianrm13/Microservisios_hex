@@ -1,19 +1,56 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import { DataTypes, Model, Optional } from 'sequelize';
+import { sequelize } from '../../infrastructure/database/db';
 
-interface AuditLog extends Document {
-    userId: string; // ID del usuario que realiza la acción
-    action: string; // Tipo de acción (e.g., 'login', 'create', 'update', 'delete')
-    timestamp: Date; // Fecha y hora de la acción
-    details: string; // Detalles adicionales sobre la acción
+interface IAuditLogAttributes {
+    id?: number;
+    userId: string;
+    action: string;
+    timestamp?: Date;
+    details: string;
 }
 
-const AuditLogSchema: Schema = new Schema({
-    userId: { type: String, required: true },
-    action: { type: String, required: true },
-    timestamp: { type: Date, default: Date.now },
-    details: { type: String, required: true },
-});
+// Hacemos que `id` y `timestamp` sean opcionales en la creación del registro.
+interface IAuditLogCreationAttributes extends Optional<IAuditLogAttributes, 'id' | 'timestamp'> {}
 
-const AuditLogModel = mongoose.model<AuditLog>('AuditLog', AuditLogSchema);
+class AuditLog extends Model<IAuditLogAttributes, IAuditLogCreationAttributes> implements IAuditLogAttributes {
+    public id!: number;
+    public userId!: string;
+    public action!: string;
+    public timestamp!: Date;
+    public details!: string;
+}
 
-export default AuditLogModel;
+AuditLog.init(
+    {
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+        },
+        userId: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        action: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        timestamp: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: DataTypes.NOW,
+        },
+        details: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+    },
+    {
+        sequelize,
+        tableName: 'audit_logs',
+        modelName: 'AuditLog',
+        timestamps: false,
+    }
+);
+
+export default AuditLog;

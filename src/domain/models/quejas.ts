@@ -1,25 +1,65 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import { DataTypes, Model, Optional } from 'sequelize';
+import { sequelize } from '../../infrastructure/database/db';
 
-export interface IQueja extends Document {
+interface IQuejaAttributes {
+    id?: number;
     title: string;
     description: string;
     category: 'Alumbrado' | 'Baches' | 'Limpieza' | 'Seguridad';
-    status: string;
-    dateCreated: Date;
+    status?: string;
+    dateCreated?: Date;
+    filePath?: string;
 }
 
-const quejaSchema: Schema = new Schema({
-    title: { type: String, required: true },
-    description: { type: String, required: true },
-    category: {
-        type: String,
-        required: true,
-        enum: ['Alumbrado', 'Baches', 'Limpieza', 'Seguridad'],
-    },
-    status: { type: String, default: 'Pendiente' },
-    dateCreated: { type: Date, default: Date.now },
-});
+// marcar propiedades opcionales usando Partial para el caso de `status` y `dateCreated`
+interface IQuejaCreationAttributes extends Optional<IQuejaAttributes, 'id' | 'status' | 'dateCreated'> {}
 
-const Queja = mongoose.model<IQueja>('Queja', quejaSchema);
+class Queja extends Model<IQuejaAttributes, IQuejaCreationAttributes> implements IQuejaAttributes {
+    public id!: number;
+    public title!: string;
+    public description!: string;
+    public category!: 'Alumbrado' | 'Baches' | 'Limpieza' | 'Seguridad';
+    public status!: string;
+    public dateCreated!: Date;
+    public filePath?: string; 
+}
+
+Queja.init(
+    {
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+        },
+        title: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        description: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        category: {
+            type: DataTypes.ENUM('Alumbrado', 'Baches', 'Limpieza', 'Seguridad'),
+            allowNull: false,
+        },
+        status: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            defaultValue: 'Pendiente',
+        },
+        dateCreated: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: DataTypes.NOW,
+        },
+    },
+    {
+        sequelize,
+        tableName: 'quejas',
+        modelName: 'Queja',
+        timestamps: false,
+    }
+);
 
 export default Queja;
