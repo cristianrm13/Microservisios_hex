@@ -5,7 +5,7 @@ import { logAudit } from '../../../../Notificaciones/src/services/auditService';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
-
+import amqp from 'amqplib';
 
 
 export class UserController {
@@ -58,6 +58,17 @@ export class UserController {
             };
 
             await transporter.sendMail(mailOptions);
+
+  // Enviar mensaje a RabbitMQ
+            const connection = await amqp.connect('amqp://localhost');
+            const channel = await connection.createChannel();
+            const queue = 'user_created';
+
+            await channel.assertQueue(queue, { durable: true });
+            channel.sendToQueue(queue, Buffer.from(JSON.stringify(usuario)));
+            console.log(' [x] Sent user creation message to RabbitMQ');
+
+            setTimeout(() => connection.close(), 500);
 
             res.status(201).send({ token, nombre: usuario.nombre });
         } catch (error) {

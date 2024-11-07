@@ -1,7 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../../../Notificaciones/src/infrastructure/database/db';
 
-
 export interface IUsuario {
     id?: number;
     nombre: string;
@@ -9,26 +8,18 @@ export interface IUsuario {
     contrasena: string;
     telefono: string;
     codigo_verificacion: string;
-    fecha_operacion	?: Date;
+    fecha_operacion?: Date;
 }
 
-
 class Usuario extends Model<IUsuario> implements IUsuario {
-    static findById(_id: string) {
-        throw new Error('Method not implemented.');
-    }
-    static find(arg0: {}) {
-        throw new Error('Method not implemented.');
-    }
     public id!: number;
     public nombre!: string;
     public correo!: string;
     public contrasena!: string;
     public telefono!: string;
     public codigo_verificacion!: string;
-    public fecha_operacion	!: Date;
+    public fecha_operacion!: Date;
 }
-
 
 Usuario.init(
     {
@@ -58,7 +49,7 @@ Usuario.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
-        fecha_operacion	: {
+        fecha_operacion: {
             type: DataTypes.DATE,
             allowNull: false,
             defaultValue: DataTypes.NOW,
