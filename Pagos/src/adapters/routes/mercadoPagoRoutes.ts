@@ -9,7 +9,7 @@ const router = Router();
 const pagoController = new PagoController();
 const mercadoPagoService = new MercadoPagoService(); 
 
-router.get('/pago', /* authMiddleware, */ pagoController.getPagos);
+router.get('/pago', /* authMiddleware, */ pagoController.obtenerPagos);
 
 router.post('/pago', async (req: Request, res: Response) => {
     try {
