@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import Payment from '../../domain/models/pagos';
 
-export class NotificationController {
+export class PagoController {
     constructor() {}
 
     // Crear una nueva notificación si los datos no son nulos
-    createNotification = async (req: Request, res: Response): Promise<Response> => {
+    createPago = async (req: Request, res: Response): Promise<Response> => {
         try {
             const { payment_id, status_detail, currency_id, total_paid_amount, date_created } = req.body;
 
@@ -36,7 +36,7 @@ export class NotificationController {
     };
 
     // Obtener todos los pagos
-    getNotifications = async (_req: Request, res: Response): Promise<Response> => {
+    getPagos = async (_req: Request, res: Response): Promise<Response> => {
         try {
             const payments = await Payment.findAll();
             return res.status(200).json(payments);
@@ -47,7 +47,7 @@ export class NotificationController {
     };
 
     // Obtener un pago por ID
-    getNotificationById = async (req: Request, res: Response): Promise<Response> => {
+    getPagoById = async (req: Request, res: Response): Promise<Response> => {
         try {
             const { id } = req.params;
             const payment = await Payment.findByPk(id);
@@ -62,7 +62,7 @@ export class NotificationController {
     };
 
     // Eliminar un pago por ID
-    deleteNotification = async (req: Request, res: Response): Promise<Response> => {
+    deletePago = async (req: Request, res: Response): Promise<Response> => {
         try {
             const { id } = req.params;
             const deletedPayment = await Payment.findByPk(id);
@@ -79,7 +79,7 @@ export class NotificationController {
     }
 }
 
-export const createNotification = new NotificationController().createNotification;
-export const getNotifications = new NotificationController().getNotifications;
-export const getNotificationById = new NotificationController().getNotificationById;
-export const deleteNotification = new NotificationController().deleteNotification;
+export const createPago = new PagoController().createPago;
+export const getPagos = new PagoController().getPagos;
+export const getPagoById = new PagoController().getPagoById;
+export const deletePago = new PagoController().deletePago;
