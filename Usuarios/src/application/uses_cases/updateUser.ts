@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Usuario from '../../domain/models/usuario';
+import { logAudit } from '../../../../Notificaciones/src/services/auditService';
 
 
 export const actualizarUsuarioService = async (req: Request, res: Response) => {
@@ -19,8 +20,12 @@ export const actualizarUsuarioService = async (req: Request, res: Response) => {
         updates.forEach((update) => {
             (usuario as any)[update] = req.body[update];
         });
-        usuario.fecha_operacion	 = new Date();
+        usuario.fecha_operacion = new Date();
         await usuario.save();
+
+        // Registrar auditoría al actualizar un usuario
+        await logAudit(usuario.id.toString(), 'update', `Usuario actualizado: ${usuario.correo}`);
+
         res.status(200).send(usuario);
     } catch (error) {
         res.status(400).send(error);

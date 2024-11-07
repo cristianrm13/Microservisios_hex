@@ -13,10 +13,13 @@ export const loginUsuarioService = async (req: Request, res: Response) => {
             return res.status(401).send({ error: 'Credenciales no válidas.' });
         }
 
-        usuario.fecha_operacion	 = new Date();
+        usuario.fecha_operacion = new Date();
         await usuario.save();
 
         const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET || 'holatutu');
+        // Registrar auditoría al logearse
+        await logAudit(usuario.id.toString(), 'login', `Usuario inició sesión: ${correo}`);
+
         res.send({ usuario, token });
     } catch (error) {
         res.status(400).send(error);

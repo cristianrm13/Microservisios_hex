@@ -2,10 +2,14 @@ import { Router, Request, Response } from 'express';
 import { MercadoPagoService } from '../../services/mercadoPagoService';
 import { sendWhatsAppMessage } from '../../../../Notificaciones/src/services/twilioService';
 import PaymentModel from '../../domain/models/pagos'
+import { PagoController } from '../controllers/pagoController';
 
 
 const router = Router();
-const mercadoPagoService = new MercadoPagoService();  
+const pagoController = new PagoController();
+const mercadoPagoService = new MercadoPagoService(); 
+
+router.get('/pago', /* authMiddleware, */ pagoController.getPagos);
 
 router.post('/pago', async (req: Request, res: Response) => {
     try {

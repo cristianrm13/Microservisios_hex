@@ -23,6 +23,8 @@ export const crearUsuarioService = async (req: Request, res: Response) => {
             telefono,
             codigo_verificacion,
         });
+        // Registrar auditoría
+        await logAudit(usuario.id.toString(), 'create', `Usuario creado: ${nombre}`);
 
         const token = jwt.sign(
             { id: usuario.id },
@@ -50,10 +52,9 @@ export const crearUsuarioService = async (req: Request, res: Response) => {
                         </div>
                     </div>`,
         };
-
         await transporter.sendMail(mailOptions);
 
-// Enviar mensaje a RabbitMQ
+        // Enviar mensaje a RabbitMQ
         const connection = await amqp.connect('amqp://localhost');
         const channel = await connection.createChannel();
         const queue = 'user_created';

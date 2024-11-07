@@ -1,7 +1,7 @@
-import { DataTypes, Model } from 'sequelize';
+import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../../../../Notificaciones/src/infrastructure/database/db';
 
-export interface IUsuario {
+interface IUsuario {
     id?: number;
     nombre: string;
     correo: string;
@@ -10,8 +10,11 @@ export interface IUsuario {
     codigo_verificacion: string;
     fecha_operacion?: Date;
 }
+// Interfaz para los atributos opcionales al crear un Usuario
+interface IUsuarioCreationAttributes extends Optional<IUsuario, 'id' | 'fecha_operacion'> {}
 
-class Usuario extends Model<IUsuario> implements IUsuario {
+class Usuario extends Model<IUsuario, IUsuarioCreationAttributes> implements IUsuario {
+//class Usuario extends Model<IUsuario> implements IUsuario {
     public id!: number;
     public nombre!: string;
     public correo!: string;

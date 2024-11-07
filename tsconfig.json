@@ -12,8 +12,8 @@
       "dist"
     ],
     "include": [
-        "src/**/*",
-        "src/multer.d.ts" // Asegúrate de incluir el archivo de tipos
+        "Notificaciones/src/**/*",
+        "Notificaciones/src/multer.d.ts"
     ]
 }
   
