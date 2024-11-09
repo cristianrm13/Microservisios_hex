@@ -40,12 +40,12 @@ const runConsumer = async () => {
             await transporter.sendMail(mailOptions);
             console.log("Correo enviado a: ", usuario.correo);
 
-            // Enviar mensaje de WhatsApp usando Twilio (opcional)
+            // Enviar mensaje de WhatsApp usando Twilio
             const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
             await client.messages.create({
                 body: `¡Hola ${usuario.nombre}! Gracias por unirte a GladBox. Tu código de verificación es: ${usuario.codigo_verificacion}`,
                 from: 'whatsapp:+14155238886', 
-                to: `whatsapp:${usuario.telefono}`
+                to: `whatsapp:+521${usuario.telefono}`
             });
             console.log("Mensaje de WhatsApp enviado a: ", usuario.telefono);
 
