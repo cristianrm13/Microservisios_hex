@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-//import mongoose from 'mongoose';
+import mongoose from 'mongoose';
 import routes from '../adapters/routes/index';
 import handleError from '../adapters/middlewares/handleError';
 import auditRoutes from '../adapters/routes/auditRoutes';
@@ -20,13 +20,13 @@ if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
     process.exit(1);
 }
 
-/* mongoose.connect(process.env.MONGODB_URI || '')
+mongoose.connect(process.env.MONGODB_URI || '')
     .then(() => {
         console.log('Conectado a la base de datos MongoDB');
     })
     .catch((error) => {
         console.error('Error al conectar a la base de datos MongoDB', error);
-    }); */
+    });
 
 
 const sequelize = new Sequelize(process.env.MYSQL_DB || '', process.env.MYSQL_USER || '', process.env.MYSQL_PASSWORD || '', {

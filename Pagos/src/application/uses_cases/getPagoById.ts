@@ -4,7 +4,7 @@ import Payment from '../../domain/models/pagos';
 export const obtenerPagoPorIdService = async (req: Request, res: Response): Promise<Response> => {
     try {
         const { id } = req.params;
-        const payment = await Payment.findByPk(id);
+        const payment = await Payment.findById(id);
         if (!payment) {
             return res.status(404).json({ message: 'Pago no encontrado' });
         }
