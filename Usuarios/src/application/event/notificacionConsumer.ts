@@ -12,43 +12,49 @@ const runConsumer = async () => {
 
     channel.consume(queue, async (msg) => {
         if (msg !== null) {
-            const usuario = JSON.parse(msg.content.toString());
-            console.log(" [x] Received %s", usuario);
+            const mensaje = JSON.parse(msg.content.toString());
+            const tipoEvento = mensaje.tipo_evento;  // Obtenemos el tipo de evento
 
-            // Configura transporte de correo
-            const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: '221267@ids.upchiapas.edu.mx',
-                    pass: process.env.GMAIL_APP_PASSWORD,
-                },
-            });
+            console.log(" [x] Received event type:", tipoEvento);
 
-            const mailOptions = {
-                from: '221267@ids.upchiapas.edu.mx',
-                to: usuario.correo,
-                subject: '¡Bienvenido a GladBox!',
-                text: `¡Hola ${usuario.nombre}, nuevo usuario registrado!,`,
-                html: `<div style="text-align: center; font-family: Arial, sans-serif;">
-                        <h1>¡Hola ${usuario.nombre}!</h1>
-                        <p>Gracias por unirte. Tu código de verificación es:</p>
-                        <div style="display: inline-block; padding: 10px; border: 2px solid #000; border-radius: 5px;">
-                            <h2>${usuario.codigo_verificacion}</h2>
-                        </div>
-                    </div>`,
-            };
+            if (tipoEvento === 'usuario_creado') {
+                const usuario = mensaje.usuario;
 
-            await transporter.sendMail(mailOptions);
-            console.log("Correo enviado a: ", usuario.correo);
+                // Enviar correo de bienvenida
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: '221267@ids.upchiapas.edu.mx',
+                        pass: process.env.GMAIL_APP_PASSWORD,
+                    },
+                });
 
-            // Enviar mensaje de WhatsApp usando Twilio
-            const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-            await client.messages.create({
-                body: `¡Hola ${usuario.nombre}! Gracias por unirte a GladBox. Tu código de verificación es: ${usuario.codigo_verificacion}`,
-                from: 'whatsapp:+14155238886', 
-                to: `whatsapp:+521${usuario.telefono}`
-            });
-            console.log("Mensaje de WhatsApp enviado a: ", usuario.telefono);
+                const mailOptions = {
+                    from: '221267@ids.upchiapas.edu.mx',
+                    to: usuario.correo,
+                    subject: '¡Bienvenido a GladBox!',
+                    text: `¡Hola ${usuario.nombre}, nuevo usuario registrado!`,
+                    html: `<div style="text-align: center; font-family: Arial, sans-serif;">
+                            <h1>¡Hola ${usuario.nombre}!</h1>
+                            <p>Gracias por unirte. Tu código de verificación es:</p>
+                            <div style="display: inline-block; padding: 10px; border: 2px solid #000; border-radius: 5px;">
+                                <h2>${usuario.codigo_verificacion}</h2>
+                            </div>
+                        </div>`,
+                };
+
+                await transporter.sendMail(mailOptions);
+                console.log("Correo enviado a: ", usuario.correo);
+
+                // Enviar mensaje de WhatsApp usando Twilio
+                const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+                await client.messages.create({
+                    body: `¡Hola ${usuario.nombre}! Gracias por unirte a GladBox. Tu código de verificación es: ${usuario.codigo_verificacion}`,
+                    from: 'whatsapp:+14155238886', 
+                    to: `whatsapp:+521${usuario.telefono}`
+                });
+                console.log("Mensaje de WhatsApp enviado a: ", usuario.telefono);
+            }
 
             channel.ack(msg);
         }

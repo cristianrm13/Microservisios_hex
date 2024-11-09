@@ -31,36 +31,20 @@ export const crearUsuarioService = async (req: Request, res: Response) => {
             process.env.JWT_SECRET || 'holatutu'
         );
 
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: '221267@ids.upchiapas.edu.mx',
-                pass: process.env.GMAIL_APP_PASSWORD,
-            },
-        });
-
-        const mailOptions = {
-            from: '221267@ids.upchiapas.edu.mx',
-            to: correo,
-            subject: '¡Bienvenido a GladBox!',
-            text: `¡Hola ${nombre}!, tu código de verificación es: ${codigo_verificacion}`,
-            html: `<div style="text-align: center; font-family: Arial, sans-serif;">
-                        <h1>¡Hola ${nombre}!</h1>
-                        <p>Gracias por unirte. Tu código de verificación es:</p>
-                        <div style="display: inline-block; padding: 10px; border: 2px solid #000; border-radius: 5px;">
-                            <h2>${codigo_verificacion}</h2>
-                        </div>
-                    </div>`,
-        };
-        await transporter.sendMail(mailOptions);
-
-        // Enviar mensaje a RabbitMQ
+        // Enviar mensaje a RabbitMQ con tipo de evento
         const connection = await amqp.connect('amqp://localhost');
         const channel = await connection.createChannel();
         const queue = 'user_created';
 
         await channel.assertQueue(queue, { durable: true });
-        channel.sendToQueue(queue, Buffer.from(JSON.stringify(usuario)));
+
+        // Crear mensaje con tipo de evento
+        const mensaje = {
+            tipo_evento: 'usuario_creado',  // Tipo de evento
+            usuario: usuario,               // Datos del usuario
+        };
+
+        channel.sendToQueue(queue, Buffer.from(JSON.stringify(mensaje)));
         console.log(' [x] Sent user creation message to RabbitMQ');
 
         setTimeout(() => connection.close(), 500);
