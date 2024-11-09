@@ -70,6 +70,7 @@ app.use('/api/audit', auditRoutes);
 app.listen(port, () => {
     console.log(`Servidor corriendo en el puerto ${port}`);
 });
+import 'C:/Users/luisv/OneDrive/Documentos/9B/Proyecto/MICROSERVICIO/API_microservicios/Usuarios/src/application/event/notificacionConsumer.ts';
 
 app.use(handleError);
 
