@@ -3,8 +3,8 @@
       "target": "es6",
       "module": "commonjs",
       "strict": true,
-      "esModuleInterop": true,  // Habilita la interoperabilidad de módulos ES
-      "skipLibCheck": true,      // Evita que TypeScript revise los tipos dentro de los módulos de node_modules
+      "esModuleInterop": true, 
+      "skipLibCheck": true, 
       "moduleResolution": "node"
     },
     "exclude": [
@@ -12,8 +12,8 @@
       "dist"
     ],
     "include": [
-        "src/**/*",
-        "src/multer.d.ts" // Asegúrate de incluir el archivo de tipos
-    ]
-  }
+        "Notificaciones/src/**/*",
+        "Notificaciones/src/multer.d.ts"
+, "Migracion"    ]
+}
   
