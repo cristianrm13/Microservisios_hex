@@ -8,7 +8,7 @@ import 'dotenv/config';
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: '221263@ids.upchiapas.edu.mx',
+        user: '221267@ids.upchiapas.edu.mx',
         pass: process.env.GMAIL_APP_PASSWORD,
     },
 });
