@@ -28,6 +28,7 @@ const runConsumer = async () => {
                 from: '221267@ids.upchiapas.edu.mx',
                 to: usuario.correo,
                 subject: '¡Bienvenido a GladBox!',
+                text: `¡Hola ${usuario.nombre}, nuevo usuario registrado!,`,
                 html: `<div style="text-align: center; font-family: Arial, sans-serif;">
                         <h1>¡Hola ${usuario.nombre}!</h1>
                         <p>Gracias por unirte. Tu código de verificación es:</p>
