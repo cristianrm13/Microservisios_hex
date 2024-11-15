@@ -18,7 +18,7 @@ const loginLimiter = rateLimit({
 
 const dailyLimiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000,//  1 dia
-    max: 3, // Limitar a 3 intentos de inicio de sesión por IP
+    max: 300, // Limitar a 3 intentos de inicio de sesión por IP
     message: 'Intenta de nuevo más tarde.',
     standardHeaders: true,
     legacyHeaders: false,

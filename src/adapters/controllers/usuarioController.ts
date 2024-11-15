@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { ObjectId } from 'mongodb';
 import Usuario, { IUsuario } from '../../domain/models/usuario';
 import { logAudit } from '../../services/auditService';
 
@@ -7,16 +6,15 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 
-
-
 export class UserController {
     constructor() { }
 
     // Crear un nuevo usuario
     crearUsuario = async (req: Request, res: Response) => {
         try {
-            const { nombre, correo, contrasena, telefono } = req.body;
+            const { nombre, correo, contrasena, telefono, role = 'user' } = req.body;
 
+            // Verifica si el correo ya existe
             const correoExistente = await Usuario.findOne({ correo });
             if (correoExistente) {
                 console.log(`El correo ${correo} ya está registrado.`);
@@ -26,12 +24,14 @@ export class UserController {
             const codigoVerificacion = crypto.randomBytes(3).toString('hex');
             console.log(`Código de verificación generado: ${codigoVerificacion}`);
 
+            // Crea el usuario con el rol indicado o el valor predeterminado
             const usuario = new Usuario({
                 nombre,
                 correo,
                 contrasena,
                 telefono,
                 codigoVerificacion,
+                role,
             });
             await usuario.save();
             console.log(`Usuario ${nombre} guardado en la base de datos.`);
@@ -40,7 +40,7 @@ export class UserController {
             await logAudit(usuario._id.toString(), 'create', `Usuario creado: ${nombre}`);
 
             const token = jwt.sign(
-                { _id: usuario._id },
+                { _id: usuario._id, role: usuario.role },
                 process.env.JWT_SECRET || 'holatutu'
             );
             console.log(`Token JWT generado: ${token}`);
@@ -69,20 +69,17 @@ export class UserController {
                 `,
             };
 
-            // Enviar el correo usando Nodemailer
             const emailResponse = await transporter.sendMail(mailOptions);
             console.log('Correo enviado exitosamente:', emailResponse);
 
-            // Enviar respuesta al cliente
-            res.status(201).send({ token, nombre: usuario.nombre });
+            res.status(201).send({ token, nombre: usuario.nombre, role: usuario.role });
         } catch (error) {
             console.error('Error en crearUsuario:', error);
             res.status(500).send({ error: 'Error al crear el usuario o enviar el correo.' });
         }
     };
 
-
-    // Validacion de usuario usando JWT
+    // Validación de usuario usando JWT
     loginUsuario = async (req: Request, res: Response) => {
         try {
             const { correo, contrasena } = req.body;
@@ -90,11 +87,16 @@ export class UserController {
             if (!usuario || usuario.contrasena !== contrasena) {
                 return res.status(401).send({ error: 'Credenciales no válidas.' });
             }
-            const token = jwt.sign({ _id: usuario._id }, process.env.JWT_SECRET || 'holatutu');
+            const token = jwt.sign(
+                { _id: usuario._id, role: usuario.role },
+                process.env.JWT_SECRET || 'holatutu'
+            );
+
             // Registrar auditoría al logearse
             await logAudit(usuario._id.toString(), 'login', `Usuario inició sesión: ${correo}`);
 
-            res.send({ usuario, token });
+            // Responder con los datos de usuario, token y rol
+            res.send({ usuario, token, role: usuario.role });
         } catch (error) {
             res.status(400).send(error);
         }
@@ -127,7 +129,7 @@ export class UserController {
     // Actualizar un usuario por ID
     actualizarUsuario = async (req: Request, res: Response) => {
         const updates = Object.keys(req.body) as Array<keyof IUsuario>;
-        const allowedUpdates: Array<keyof IUsuario> = ['nombre', 'correo', 'contrasena', 'telefono'];
+        const allowedUpdates: Array<keyof IUsuario> = ['nombre', 'correo', 'contrasena', 'telefono', 'role'];
         const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
 
         if (!isValidOperation) {
@@ -171,16 +173,9 @@ export class UserController {
     };
 }
 
-
 export const crearUsuario = UserController.prototype.crearUsuario;
-
 export const obtenerUsuarios = UserController.prototype.obtenerUsuarios;
-
 export const obtenerUsuarioPorId = UserController.prototype.obtenerUsuarioPorId;
-
 export const actualizarUsuario = UserController.prototype.actualizarUsuario;
-
 export const eliminarUsuario = UserController.prototype.eliminarUsuario;
-
 export const loginUsuario = UserController.prototype.loginUsuario;
-

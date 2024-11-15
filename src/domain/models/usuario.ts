@@ -7,6 +7,7 @@ export interface IUsuario extends Document {
     contrasena: string;
     telefono: string;
     codigoVerificacion: string;
+    role: string; // Nuevo campo para el rol del usuario
 }
 
 // Definir el esquema para el modelo Usuario
@@ -31,8 +32,13 @@ const usuarioSchema = new Schema<IUsuario>({
     codigoVerificacion: {
         type: String,
         required: true,
-    }
-}, {
+    },
+    role: {
+        type: String,
+        required: true,
+        default: 'user', // Valor predeterminado para usuarios normales
+        enum: ['user', 'admin'], // Restricción de roles posibles
+    },
 });
 
 // Definir el modelo Usuario
