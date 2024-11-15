@@ -6,6 +6,7 @@ export interface IQueja extends Document {
     category: 'Alumbrado' | 'Baches' | 'Limpieza' | 'Seguridad';
     status: string;
     dateCreated: Date;
+    userId: mongoose.Schema.Types.ObjectId;
 }
 
 const quejaSchema: Schema = new Schema({
@@ -18,6 +19,7 @@ const quejaSchema: Schema = new Schema({
     },
     status: { type: String, default: 'Pendiente' },
     dateCreated: { type: Date, default: Date.now },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
 });
 
 const Queja = mongoose.model<IQueja>('Queja', quejaSchema);

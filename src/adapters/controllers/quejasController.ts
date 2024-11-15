@@ -11,9 +11,10 @@ export class QuejaController {
     crearQueja = async (req: Request, res: Response) => {
         try {
             const { title, description, category } = req.body;
+            const userId = req.params.id;
             const filePath = req.file?.path; // Obtener la ruta del archivo
 
-            const queja = new Queja({ title, description, category, filePath });
+            const queja = new Queja({ title, description, category, filePath, userId });
             await queja.save();
             // Generar Word
             await this.generarWord(queja);
@@ -166,9 +167,21 @@ export class QuejaController {
         }
     };
 
+    // Obtener las quejas de un usuario específico
+    obtenerQuejasPorUsuario = async (req: Request, res: Response) => {
+        const userId = req.params.id; // ID del usuario en el parámetro de la URL
+        try {
+            const quejas = await Queja.find({ userId });
+            res.status(200).send(quejas);
+        } catch (error) {
+            console.error('Error al obtener las quejas del usuario:', error);
+            res.status(500).send({ error: 'Error al obtener las quejas del usuario.' });
+        }
+    };
+
     // Obtener una queja por ID
     obtenerQuejaPorId = async (req: Request, res: Response) => {
-        const _id = req.params.id;
+        const _id = req.params.userId;
         try {
             const queja = await Queja.findById(_id);
             if (!queja) {

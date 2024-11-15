@@ -24,4 +24,6 @@ router.delete('/:id', authMiddleware, quejaController.eliminarQueja); // Elimina
 // Aplicar el limitador de velocidad en la ruta para crear quejas
 router.post('/', upload.single('file'), quejaLimiter, authMiddleware, quejaController.crearQueja); // Crear queja
 
+router.get('/usuario/:id',/*  authMiddleware, */ quejaController.obtenerQuejasPorUsuario); // Obtener quejas por usuario
+
 export default router;
