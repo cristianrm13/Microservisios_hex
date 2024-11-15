@@ -11,7 +11,9 @@ export class QuejaController {
     crearQueja = async (req: Request, res: Response) => {
         try {
             const { title, description, category } = req.body;
-            const userId = req.params.id;
+            const userId = (req as any).userId;
+
+           // const userId = req.params.id;
             const filePath = req.file?.path; // Obtener la ruta del archivo
 
             const queja = new Queja({ title, description, category, filePath, userId });
@@ -181,7 +183,7 @@ export class QuejaController {
 
     // Obtener una queja por ID
     obtenerQuejaPorId = async (req: Request, res: Response) => {
-        const _id = req.params.userId;
+        const _id = req.params.id;
         try {
             const queja = await Queja.findById(_id);
             if (!queja) {

@@ -9,7 +9,7 @@ const quejaController = new QuejaController();
 
 const quejaLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 10, // Limitar a 10 quejas por IP
+    max: 100, // Limitar a 10 quejas por IP
     message: 'Intenta de nuevo más tarde.',
     standardHeaders: true,
     legacyHeaders: false,
