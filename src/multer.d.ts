@@ -12,6 +12,7 @@ declare global {
                 filename: string;
                 path: string;
                 size: number;
+                folder: string;
             };
         }
     }

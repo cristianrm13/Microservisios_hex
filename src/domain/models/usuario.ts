@@ -7,7 +7,7 @@ export interface IUsuario extends Document {
     contrasena: string;
     telefono: string;
     codigoVerificacion: string;
-    role: string; // Nuevo campo para el rol del usuario
+    role: string; 
 }
 
 // Definir el esquema para el modelo Usuario
