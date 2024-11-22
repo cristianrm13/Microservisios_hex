@@ -3,6 +3,7 @@ import { QuejaController } from '../controllers/quejasController';
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { upload } from '../middlewares/multerConfig';
 import rateLimit from 'express-rate-limit';
+import { validarQueja } from '../middlewares/validarQuejas';
 
 const router = Router();
 const quejaController = new QuejaController();
@@ -16,8 +17,8 @@ const quejaLimiter = rateLimit({
 });
 
 // Rutas para quejas
-router.get('/', /* authMiddleware, */ quejaController.obtenerQuejas); // Obtener todas las quejas
-router.get('/:id', /* authMiddleware, */ quejaController.obtenerQuejaPorId); // Obtener queja por ID
+router.get('/', /* authMiddleware, */ quejaController.obtenerQuejas);
+router.get('/:id', /* authMiddleware, */ quejaController.obtenerQuejaPorId);
 // Ruta para obtener quejas por categoría
 router.get('/categoria/:category', quejaController.obtenerQuejasPorCategoria);
 router.get('/estadisticas/categorias', quejaController.obtenerQuejasPorCategoriaAgrupadas);
@@ -30,14 +31,14 @@ router.get('/estadisticas/frecuencia', quejaController.obtenerCategoriaMasFrecue
 
 router.get('/estadisticas/:quejaId/historico', quejaController.obtenerHistorialQueja);
 
-
-router.patch('/:id', authMiddleware, quejaController.actualizarQueja); // Actualizar queja por ID
-router.delete('/:id', authMiddleware, quejaController.eliminarQueja); // Eliminar queja por ID
+router.patch('/:id', authMiddleware, validarQueja, quejaController.actualizarQueja);
+router.delete('/:id', authMiddleware, quejaController.eliminarQueja);
 
 // Aplicar el limitador de velocidad en la ruta para crear quejas
-router.post('/', upload.single('file'), quejaLimiter, authMiddleware, quejaController.crearQueja); // Crear queja
-//router.post('/', upload.fields([{ name: 'file', maxCount: 1 }, { name: 'wordFile', maxCount: 1 }]), quejaLimiter, authMiddleware, quejaController.crearQueja); // Crear queja
+router.post('/', upload.single('file'), validarQueja, quejaLimiter, authMiddleware, quejaController.crearQueja);
 
-router.get('/usuario/:id',/*  authMiddleware, */ quejaController.obtenerQuejasPorUsuario); // Obtener quejas por usuario
+router.get('/usuario/:id',/* authMiddleware, */ quejaController.obtenerQuejasPorUsuario); // Obtener quejas por usuario
+
+
 
 export default router;

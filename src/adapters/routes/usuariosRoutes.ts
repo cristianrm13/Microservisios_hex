@@ -30,7 +30,7 @@ router.post('/login', loginLimiter, userController.loginUsuario);
 
 router.get('/', authMiddleware, userController.obtenerUsuarios);
 router.get('/:id', /* authMiddleware, */ userController.obtenerUsuarioPorId);
-router.put('/:id',/*  authMiddleware, */ /* validarUsuario, */ userController.actualizarUsuario);
+router.put('/:id',/*  authMiddleware, */ validarUsuario, userController.actualizarUsuario);
 router.delete('/:id', authMiddleware, userController.eliminarUsuario);
 
 

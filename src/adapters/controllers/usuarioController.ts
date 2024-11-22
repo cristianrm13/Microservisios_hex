@@ -1,25 +1,29 @@
 import { Request, Response } from 'express';
 import Usuario, { IUsuario } from '../../domain/models/usuario';
 import { logAudit } from '../../services/auditService';
-
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
+import bcrypt from 'bcrypt';
 
 export class UserController {
     constructor() { }
 
-    // Crear un nuevo usuario
     crearUsuario = async (req: Request, res: Response) => {
         try {
             const { nombre, correo, contrasena, telefono, role = 'user' } = req.body;
+            // Validación de datos requeridos
+            if (!nombre || !correo || !contrasena || !telefono) {
+                return res.status(400).send({ error: 'Faltan datos necesarios para el registro.' });
+            }
 
-            // Verifica si el correo ya existe
             const correoExistente = await Usuario.findOne({ correo });
             if (correoExistente) {
                 console.log(`El correo ${correo} ya está registrado.`);
                 return res.status(400).json({ error: 'El correo ya está en uso.' });
             }
+            const saltRounds = 10;
+            const hashedPassword = await bcrypt.hash(contrasena, saltRounds);
 
             const codigoVerificacion = crypto.randomBytes(3).toString('hex');
             console.log(`Código de verificación generado: ${codigoVerificacion}`);
@@ -28,7 +32,7 @@ export class UserController {
             const usuario = new Usuario({
                 nombre,
                 correo,
-                contrasena,
+                contrasena: hashedPassword,
                 telefono,
                 codigoVerificacion,
                 role,
@@ -84,9 +88,12 @@ export class UserController {
         try {
             const { correo, contrasena } = req.body;
             const usuario = await Usuario.findOne({ correo });
-            if (!usuario || usuario.contrasena !== contrasena) {
+            if (!usuario || !(await bcrypt.compare(contrasena, usuario.contrasena))) {
                 return res.status(401).send({ error: 'Credenciales no válidas.' });
             }
+            /* if (!usuario || usuario.contrasena !== contrasena) {
+                return res.status(401).send({ error: 'Credenciales no válidas.' });
+            } */
             const token = jwt.sign(
                 { _id: usuario._id, role: usuario.role },
                 process.env.JWT_SECRET || 'holatutu'
@@ -158,6 +165,10 @@ export class UserController {
 
     // Eliminar un usuario por ID
     eliminarUsuario = async (req: Request, res: Response) => {
+        // Verificación de permisos: solo un admin puede eliminar usuarios
+        if (req.params.role !== 'admin') {
+            return res.status(403).send({ error: 'No tienes permiso para realizar esta acción.' });
+        }
         try {
             const usuario = await Usuario.findByIdAndDelete(req.params.id);
             if (!usuario) {
