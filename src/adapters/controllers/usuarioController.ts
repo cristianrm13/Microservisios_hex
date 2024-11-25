@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
+import { escape } from 'lodash'; 
 
 export class UserController {
     constructor() { }
@@ -17,7 +18,7 @@ export class UserController {
                 return res.status(400).send({ error: 'Faltan datos necesarios para el registro.' });
             }
 
-            const correoExistente = await Usuario.findOne({ correo });
+            const correoExistente = await Usuario.findOne({ correo: escape(req.body.correo) });
             if (correoExistente) {
                 console.log(`El correo ${correo} ya está registrado.`);
                 return res.status(400).json({ error: 'El correo ya está en uso.' });
@@ -59,12 +60,12 @@ export class UserController {
 
             const mailOptions = {
                 from: '221267@ids.upchiapas.edu.mx',
-                to: correo,
+                to: escape(correo),
                 subject: '¡Bienvenido a GladBox!',
-                text: `¡Hola ${nombre}!, tu código de verificación es: ${codigoVerificacion}`,
+                text: `¡Hola ${escape(nombre)}!, tu código de verificación es: ${codigoVerificacion}`,
                 html: `
                     <div style="text-align: center; font-family: Arial, sans-serif;">
-                        <h1>¡Hola ${nombre}!</h1>
+                        <h1>¡Hola ${escape(nombre)}!</h1>
                         <p>Gracias por unirte a nuestra comunidad!. Tu código de verificación es:</p>
                         <div style="display: inline-block; padding: 10px; border: 2px solid #000; border-radius: 5px;">
                             <h2>${codigoVerificacion}</h2>
@@ -87,7 +88,8 @@ export class UserController {
     loginUsuario = async (req: Request, res: Response) => {
         try {
             const { correo, contrasena } = req.body;
-            const usuario = await Usuario.findOne({ correo });
+            const usuario = await Usuario.findOne({ correo: escape(req.body.correo) });
+
             if (!usuario || !(await bcrypt.compare(contrasena, usuario.contrasena))) {
                 return res.status(401).send({ error: 'Credenciales no válidas.' });
             }
@@ -145,6 +147,7 @@ export class UserController {
 
         try {
             const usuario = await Usuario.findById(req.params.id);
+
             if (!usuario) {
                 return res.status(404).send({ error: 'Usuario no encontrado' });
             }

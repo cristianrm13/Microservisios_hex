@@ -2,10 +2,12 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import routes from '../adapters/routes/index'; 
+import routes from '../adapters/routes/index';
 import handleError from '../adapters/middlewares/handleError';
 import auditRoutes from '../adapters/routes/auditRoutes';
-
+import sanitizeInputs from '../adapters/middlewares/sanitizeInputs';
+import { blacklistMiddleware } from '../adapters/middlewares/blacklistMiddleware';
+import { cleanInput } from '../adapters/middlewares/cleanInput';
 dotenv.config();
 
 const app = express();
@@ -24,8 +26,8 @@ mongoose.connect(process.env.MONGODB_URI || '')
         console.error('Error al conectar a la base de datos MongoDB', error);
     });
 
-/*     // Configurar CORS dinamico
-const allowedOrigins = ['http://ec2-3-229-227-212.compute-1.amazonaws.com', 'arn:aws:s3:::gladboxbucket'];
+// Configurar CORS dinamico
+/* const allowedOrigins = ['http://ec2-3-229-227-212.compute-1.amazonaws.com', 'https://console.cloudinary.com/pm/c-ab27c215fed10a66a18d10b089aa1e/media-explorer/'];
 
 const corsOptions = {
     origin: (origin, callback) => {
@@ -42,12 +44,13 @@ const corsOptions = {
 // Aplicar CORS a toda la aplicación
 app.use(cors(corsOptions)); */
 
-
 app.use(cors());
 app.use(express.json());
+app.use(sanitizeInputs);
+app.use(blacklistMiddleware);
+app.use(cleanInput);
 
 app.use('/api', routes);
-
 app.use('/api/audit', auditRoutes);
 
 app.listen(port, () => {
