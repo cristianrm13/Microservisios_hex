@@ -38,13 +38,14 @@ router.patch('/:id',
     cleanInput,
     quejaLimiter,
     quejaController.actualizarQueja);
+
 router.delete('/:id',
     authMiddleware,
     quejaController.eliminarQueja);
 
 // Aplicar el limitador de velocidad en la ruta para crear quejas
 router.post('/',
-    upload.single('file'),
+    upload.single('image'),
     validarQueja,
     cleanInput,
     quejaLimiter,
@@ -54,6 +55,7 @@ router.post('/',
 router.get('/usuario/:id',/* authMiddleware, */
     quejaController.obtenerQuejasPorUsuario); // Obtener quejas por usuario
 
+router.post('/:id/like', quejaController.darLike);
 
 
 export default router;

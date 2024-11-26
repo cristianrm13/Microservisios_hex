@@ -8,6 +8,7 @@ import auditRoutes from '../adapters/routes/auditRoutes';
 import sanitizeInputs from '../adapters/middlewares/sanitizeInputs';
 import { blacklistMiddleware } from '../adapters/middlewares/blacklistMiddleware';
 import { cleanInput } from '../adapters/middlewares/cleanInput';
+//import comentariosRoutes from '../adapters/routes/comentariosRoutes';
 dotenv.config();
 
 const app = express();
@@ -52,7 +53,7 @@ app.use(cleanInput);
 
 app.use('/api', routes);
 app.use('/api/audit', auditRoutes);
-
+//app.use('/api/comentarios', comentariosRoutes);
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });

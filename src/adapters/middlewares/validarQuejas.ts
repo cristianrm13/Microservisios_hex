@@ -2,13 +2,14 @@ import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
 
 const schemaQ = Joi.object({
-    title: Joi.string().regex(/^[a-zA-Z\s]+$/).required().messages({
+    title: Joi.string().regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\.,;¡!¿?()\-]*$/).required().messages({
         'string.pattern.base': 'El titulo solo no puede contener caracteres',
       }),
-    description: Joi.string().regex(/^[a-zA-Z\s]+$/).required().messages({
+    description: Joi.string().regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\.,;¡!¿?()\-]*$/).required().messages({
         'string.pattern.base': 'La descripcion no puede contener caracteres',
       }),
-    category: Joi.string().required(),
+    category: Joi.string().optional(),
+    status: Joi.string().optional(),
 });
 
 export const validarQueja = (req: Request, res: Response, next: NextFunction) => {

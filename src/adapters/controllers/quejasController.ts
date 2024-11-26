@@ -16,25 +16,22 @@ export class QuejaController {
             const { title, description, category } = req.body;
             const userId = (req as any).userId;
 
-            // const userId = req.params.id;
-           // const filePath = req.file?.path; // Obtener la ruta del archivo
-
             let imageUrl = '';
-            
+
             if (req.file?.path) {
-              // Subir archivo a Cloudinary
-              const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: 'quejas', 
-              });
-              imageUrl = result.secure_url;
-        
-              // Elimina el archivo local después de subirlo
-              fs.unlinkSync(req.file.path);
+                // Subir archivo a Cloudinary
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'quejas',
+                });
+                imageUrl = result.secure_url;
+
+                // Elimina el archivo local después de subirlo
+                fs.unlinkSync(req.file.path);
             }
 
-            const queja = new Queja({ title, description, category/* , filePath */, imageUrl, userId});
+            const queja = new Queja({ title, description, category, imageUrl, userId });
             await queja.save();
-            
+
             // Generar Word
             await this.generarWord(queja);
             // Enviar el archivo Word por correo
@@ -51,11 +48,11 @@ export class QuejaController {
 
     private async enviarCorreoConAdjunto(queja: IQueja) {
         const categoriasPorCorreo: Record<string, string[]> = {
-            'cristianrmartist@gmail.com': ['Alumbrado', 'Seguridad', 'Baches'],
-            '221267@ids.upchiapas.edu.mx': ['Limpieza', 'Seguridad'],
-            'cristiangv1313@gmail.com': ['Baches', 'Limpieza'],
-            'perrera@example.com': ['Seguridad'],
-            'bomberos@example.com': ['Alumbrado', 'Seguridad'],
+            'cristianrmartist@gmail.com': ['alumbrado'],
+            '221267@ids.upchiapas.edu.mx': ['limpieza'],
+            'cristiangv1313@gmail.com': ['baches'],
+            'perrera@example.com': ['seguridad'],
+            'bomber@example.com': ['alumbrado', 'seguridad'],
         };
 
         const categorias = Array.isArray(queja.category) ? queja.category : [queja.category];
@@ -496,13 +493,6 @@ export class QuejaController {
             });
 
             // Registrar cambio de estado en el historial
-            /*  if (req.body.status && req.body.status !== queja.status) {
-                 const historico = new QuejaHistorico({
-                     quejaId: queja._id,
-                     status: req.body.status,
-                 });
-                 await historico.save();
-             } */
             if (req.body.status && req.body.status !== queja.status) {
                 const historico = new QuejaHistorico({
                     quejaId: queja._id,
@@ -528,7 +518,38 @@ export class QuejaController {
         }
     };
 
-
+    darLike = async (req: Request, res: Response) => {
+        const quejaId = req.params.id;
+        const userId = (req as any).userId;
+    
+        try {
+            // Buscar la queja por ID
+            const queja = await Queja.findById(quejaId);
+            if (!queja) {
+                return res.status(404).json({ message: 'Queja no encontrada' });
+            }
+    
+            // Verificar si el usuario ya ha dado like
+            if (queja.usersLiked.includes(userId)) {
+                return res.status(400).json({ message: 'Ya has dado like a esta queja' });
+            }
+    
+            // Agregar el like
+            queja.likes += 1;
+            queja.usersLiked.push(userId);
+    
+            // Guardar los cambios en la base de datos
+            await queja.save();
+    
+            res.status(200).json({
+                message: 'Like registrado correctamente',
+                likes: queja.likes,
+            });
+        } catch (error) {
+            console.error('Error al dar like:', error);
+            res.status(500).json({ message: 'Error al dar like', error });
+        }
+    };
 
     // Eliminar una queja por ID
     eliminarQueja = async (req: Request, res: Response) => {
@@ -543,6 +564,9 @@ export class QuejaController {
         }
     };
 }
+
+
+
 
 // Exporta las instancias del controlador
 export const crearQueja = new QuejaController().crearQueja;
@@ -561,3 +585,4 @@ export const obtenerHistorialQueja = new QuejaController().obtenerHistorialQueja
 
 export const actualizarQueja = new QuejaController().actualizarQueja;
 export const eliminarQueja = new QuejaController().eliminarQueja;
+export const darLike = new QuejaController().darLike;
